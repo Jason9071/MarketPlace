@@ -15,7 +15,10 @@ exports.get = async (req, res) => {
             return;
         }
 
-        const admins = await Admin.find().skip(skip).limit(limit);
+        const admins = await Admin.find()
+            .skip(skip)
+            .limit(limit)
+            .select({ _id: 0, accessToken: 0 });
 
         res.status(200).json({ "message": "ok", "data": { admins } });
         return;
@@ -90,7 +93,7 @@ exports.delete = async (req, res) => {
             return;
         }
 
-        await Admin.findOneAndUpdate({ id }, { ban: true, updateAt : new Date });
+        await Admin.findOneAndUpdate({ id }, { ban: true, updateAt: new Date });
 
         await conn.destroy();
 

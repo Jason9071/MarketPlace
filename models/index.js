@@ -87,7 +87,8 @@ module.exports.userSchema = new Schema({
                 enum: ["idcard", "credential"],
                 type: String
             }
-        }]
+        }],
+        _id : false
     },
     status: {
         enum: ["normal", "abnormal", "ban"],

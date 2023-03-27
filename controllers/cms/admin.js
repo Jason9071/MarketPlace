@@ -6,7 +6,7 @@ exports.login = async (req, res) => {
 
         const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
-        const admin = await Admin.findOne({ id, pw, ban : false });
+        const admin = await Admin.findOne({ id, pw, ban: false });
 
         if (admin === null) {
             res.status(403).json({ "message": "unfound admin", "data": {} });
@@ -19,7 +19,7 @@ exports.login = async (req, res) => {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
         return;
-    } 
+    }
 }
 
 exports.get = async (req, res) => {
@@ -28,7 +28,8 @@ exports.get = async (req, res) => {
 
         const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
-        const admin = await Admin.findOne({ accessToken, ban : false });
+        const admin = await Admin.findOne({ accessToken, ban: false })
+            .select({ _id: 0 });
 
         if (admin === null) {
             res.status(403).json({ "message": "unfound admin", "data": {} });
@@ -52,7 +53,7 @@ exports.update = async (req, res) => {
         const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
 
-        await Admin.findOneAndUpdate({ accessToken, ban : false }, { pw, updateAt : new Date });
+        await Admin.findOneAndUpdate({ accessToken, ban: false }, { pw, updateAt: new Date });
 
         await conn.destroy();
 

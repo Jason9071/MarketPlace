@@ -14,7 +14,8 @@ exports.get = async (req, res) => {
         }
 
         const Deposit = conn.model('Deposit', depositSchema);
-        const deposits = await Deposit.find();
+        const deposits = await Deposit.find()
+            .select({ _id: 0});
 
         res.status(200).json({ "message": "ok", "data": { deposits } });
         return;
@@ -41,7 +42,7 @@ exports.update = async (req, res) => {
         }
 
         const Deposit = conn.model('Deposit', depositSchema);
-        await Deposit.findByIdAndUpdate({ _id: depositObjectId }, { bank, branch, name, account, currency, status, updateAt : new Date });
+        await Deposit.findByIdAndUpdate({ _id: depositObjectId }, { bank, branch, name, account, currency, status, updateAt: new Date });
 
         await conn.destroy();
         res.status(200).json({ "message": "ok", "data": {} });
