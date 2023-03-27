@@ -2,12 +2,12 @@ const fs = require("fs");
 const { mongoose, connectionConfig, userSchema } = require('../../models');
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken, fileName } = req.params;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const user = await User.findOne({ accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } })
@@ -26,11 +26,12 @@ exports.get = async (req, res) => {
         }
 
         res.sendFile(imagePathWithFileName);
-
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+
+    } finally {
+        await conn.destroy();
         return;
     }
 }

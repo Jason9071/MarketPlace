@@ -5,12 +5,12 @@ const mimeTypes = require('mimetypes');
 const { mongoose, connectionConfig, userSchema } = require('../../models');
 
 exports.login = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { id, pw } = req.body;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         let newAccessToken = uuidv4();
@@ -21,7 +21,7 @@ exports.login = async (req, res) => {
             accessTokenExist = await User.findOne({ accessToken: newAccessToken });
         }
 
-        const user = await User.findOneAndUpdate({ id, pw, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { accessToken: newAccessToken, accessTokenExpiryTimestamp: currentTimestamp + 2592000, updateAt : new Date })
+        const user = await User.findOneAndUpdate({ id, pw, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { accessToken: newAccessToken, accessTokenExpiryTimestamp: currentTimestamp + 2592000, updateAt: new Date })
             .select({ _id: 0, id: 1, image: 1, status: 1, review: 1, usdt: 1, accessToken: 1 });
 
         if (user === null) {
@@ -32,21 +32,22 @@ exports.login = async (req, res) => {
         user.accessToken = newAccessToken;
 
         res.status(200).json({ "message": "ok", "data": { user } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.create = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { id, pw, email, realName, credentialId, idCardBase64, passportBase64 } = req.body;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const idExist = await User.findOne({ id });
@@ -91,7 +92,7 @@ exports.create = async (req, res) => {
 
         await fsp.writeFile(idCardPathWithFileName, idCardBuffer);
 
-        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: idCardFileName, type: "idcard" } }, updateAt : new Date });
+        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: idCardFileName, type: "idcard" } }, updateAt: new Date });
 
         const passport = passportBase64,
             passportMimeType = passport.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)[1],
@@ -110,26 +111,27 @@ exports.create = async (req, res) => {
 
         await fsp.writeFile(passportPathWithFileName, passportBuffer);
 
-        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: passportFileName, type: "credential" } }, updateAt : new Date });
+        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: passportFileName, type: "credential" } }, updateAt: new Date });
 
         await conn.destroy();
 
         res.status(200).json({ "message": "ok", "data": { accessToken: newUser.accessToken } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const user = await User.findOne({ accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } })
@@ -141,31 +143,32 @@ exports.get = async (req, res) => {
         }
 
         res.status(200).json({ "message": "ok", "data": { user } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.update = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
         const { pw } = req.body;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         await User.findOneAndUpdate({ accessToken }, { pw, updateAt: new Date });
 
-        await conn.destroy();
-
         res.status(200).json({ "message": "ok", "data": {} });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
-        return;
+    } finally {
+        await conn.destroy();
+        return ;
     }
 }

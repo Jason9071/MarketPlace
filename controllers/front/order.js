@@ -4,6 +4,7 @@ const mimeTypes = require('mimetypes');
 const { mongoose, connectionConfig, userSchema, orderSchema, depositSchema } = require('../../models');
 
 exports.inBk = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
         const { bankId, transactionId, transactionBase64, amount, from } = req.body;
@@ -15,7 +16,6 @@ exports.inBk = async (req, res) => {
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const user = await User.findOne({ accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } })
@@ -65,15 +65,18 @@ exports.inBk = async (req, res) => {
         await conn.destroy();
 
         res.status(200).json({ "message": "ok", "data": {} });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.outBk = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
         const { bankId, transactionId, amount, to } = req.body;
@@ -85,7 +88,6 @@ exports.outBk = async (req, res) => {
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const user = await User.findOne({ accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } })
@@ -115,25 +117,24 @@ exports.outBk = async (req, res) => {
         const Order = conn.model('Order', orderSchema);
         await Order.create({ user: user._id, from: "USDT", to, amount, requested: "out", transferInfo, depositOrWithdraw: deposit });
 
-        await conn.destroy();
-
         res.status(200).json({ "message": "ok", "data": {} });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.outBc = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
         const { address, chain, amount } = req.body;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const user = await User.findOne({ accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } })
@@ -151,27 +152,26 @@ exports.outBc = async (req, res) => {
         }
 
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from: "USDT", to : "USDT", amount, requested: "out", transferInfo });
-
-        await conn.destroy();
+        await Order.create({ user: user._id, from: "USDT", to: "USDT", amount, requested: "out", transferInfo });
 
         res.status(200).json({ "message": "ok", "data": {} });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { skip, limit, requested } = req.query;
         const { accessToken } = req.params;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
-        const conn = mongoose.createConnection(connectionConfig);
         const User = conn.model('User', userSchema);
 
         const user = await User.findOne({ accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } })
@@ -192,10 +192,11 @@ exports.get = async (req, res) => {
 
 
         res.status(200).json({ "message": "ok", "data": { orders } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+    } finally {
+        await conn.destroy();
         return;
     }
 }
