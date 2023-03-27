@@ -164,10 +164,10 @@ exports.outBc = async (req, res) => {
     }
 }
 
-exports.get = async (req, res) => {
+exports.getAll = async (req, res) => {
     const conn = mongoose.createConnection(connectionConfig);
     try {
-        const { skip, limit, requested } = req.query;
+        const { skip, limit, requested, status } = req.query;
         const { accessToken } = req.params;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
@@ -184,7 +184,7 @@ exports.get = async (req, res) => {
 
         const Order = conn.model('Order', orderSchema);
 
-        const orders = await Order.find({ user: user._id, requested })
+        const orders = await Order.find({ user: user._id, requested, status })
             .skip(skip)
             .limit(limit)
             .select({ _id: 0, from: 1, to: 1, requested: 1, amount: 1, status: 1, createAt: 1, transferInfo: 1, depositOrWithdraw: 1 })

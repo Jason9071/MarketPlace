@@ -20,7 +20,7 @@ router.route('/user/:accessToken')
     .put(user.update);
 
 router.route('/user/:accessToken/order')
-    .get(order.get);
+    .get(order.getAll);
 
 router.route('/user/:accessToken/order/in/bk')
     .post(order.inBk);
