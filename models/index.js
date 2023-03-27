@@ -232,6 +232,11 @@ module.exports.orderSchema = new Schema({
         required: true,
         default: 0,
     },
+    rate: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
     status: {
         enum: ["requested", "success", "fail"],
         type: String,

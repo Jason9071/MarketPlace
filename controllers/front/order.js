@@ -1,6 +1,7 @@
 const fsp = require("fs/promises");
 const fs = require("fs");
 const mimeTypes = require('mimetypes');
+const axios = require('axios');
 const { mongoose, connectionConfig, userSchema, orderSchema, depositSchema } = require('../../models');
 
 exports.inBk = async (req, res) => {
@@ -59,8 +60,10 @@ exports.inBk = async (req, res) => {
             fileName: transactionFileName
         }
 
+        const rates = await axios.get('https://api.exchangerate-api.com/v4/latest/USDT');
+
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from, to: "USDT", amount, requested: "in", transferInfo, depositOrWithdraw: deposit });
+        await Order.create({ user: user._id, from, to: "USDT", amount, requested: "in", transferInfo, depositOrWithdraw: deposit, rate: rates.data.rates[from] });
 
         await conn.destroy();
 
@@ -81,7 +84,7 @@ exports.outBk = async (req, res) => {
         const { accessToken } = req.params;
         const { bankId, transactionId, amount, to } = req.body;
 
-        if (from !== "HKD" && from !== "TWD" && from !== "USD") {
+        if (to !== "HKD" && to !== "TWD" && to !== "USD") {
             res.status(403).json({ "message": "deposit pairs are not supported", "data": {} });
             return;
         }
@@ -114,8 +117,10 @@ exports.outBk = async (req, res) => {
             fee: process.env.FEE
         }
 
+        const rates = await axios.get('https://api.exchangerate-api.com/v4/latest/USDT');
+
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from: "USDT", to, amount, requested: "out", transferInfo, depositOrWithdraw: deposit });
+        await Order.create({ user: user._id, from: "USDT", to, amount, requested: "out", transferInfo, depositOrWithdraw: deposit, rate: rates.data.rates[to] });
 
         res.status(200).json({ "message": "ok", "data": {} });
     } catch (err) {
@@ -151,8 +156,10 @@ exports.outBc = async (req, res) => {
             fee: process.env.FEE
         }
 
+        const rates = await axios.get('https://api.exchangerate-api.com/v4/latest/USDT');
+
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from: "USDT", to: "USDT", amount, requested: "out", transferInfo });
+        await Order.create({ user: user._id, from: "USDT", to: "USDT", amount, requested: "out", transferInfo, rate: rates.data.rates["USD"] });
 
         res.status(200).json({ "message": "ok", "data": {} });
     } catch (err) {
