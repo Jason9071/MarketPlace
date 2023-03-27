@@ -62,7 +62,7 @@ exports.update = async (req, res) => {
     const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
-        const { id, status, review, usdt } = req.body;
+        const { id, status, review } = req.body;
 
         const Admin = conn.model('Admin', adminSchema);
 
@@ -75,7 +75,7 @@ exports.update = async (req, res) => {
 
         const User = conn.model('User', userSchema);
 
-        await User.findOneAndUpdate({ id }, { status, review, usdt, updateAt : new Date });
+        await User.findOneAndUpdate({ id }, { status, review, updateAt : new Date });
 
         res.status(200).json({ "message": "ok", "data": {} });
     } catch (err) {
