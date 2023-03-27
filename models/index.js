@@ -130,14 +130,35 @@ module.exports.orderSchema = new Schema({
         required: true
     },
     from: {
-        enum: ["USD", "TWD", "RMB", "HKD", "USDT"],
+        enum: ["USD", "TWD", "HKD", "USDT"],
         type: String,
         required: true,
     },
     to: {
-        enum: ["USD", "TWD", "RMB", "HKD", "USDT"],
+        enum: ["USD", "TWD", "HKD", "USDT"],
         type: String,
         required: true,
+    },
+    depositOrWithdraw: {
+        type: {
+            bank: {
+                type: String,
+                required: true
+            },
+            branch: {
+                type: String,
+                required: true
+            },
+            name: {
+                type: String,
+                required: true
+            },
+            account: {
+                type: String,
+                required: true
+            },
+        },
+        _id : false
     },
     bkIn: {
         type: {
@@ -151,6 +172,23 @@ module.exports.orderSchema = new Schema({
             },
             fileName: {
                 type: String,
+                required: true
+            }
+        }
+    },
+    bcIn: {
+        type: {
+            address: {
+                type: String,
+                required: true
+            },
+            chain: {
+                enum: ["ERC20", "BEP20", "TRC20"],
+                type: String,
+                required: true
+            },
+            fee: {
+                type: Number,
                 required: true
             }
         }

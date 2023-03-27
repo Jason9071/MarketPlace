@@ -1,12 +1,17 @@
 const fsp = require("fs/promises");
 const fs = require("fs");
 const mimeTypes = require('mimetypes');
-const { mongoose, connectionConfig, userSchema, orderSchema } = require('../../models');
+const { mongoose, connectionConfig, userSchema, orderSchema, depositSchema } = require('../../models');
 
 exports.in = async (req, res) => {
     try {
         const { accessToken } = req.params;
-        const { bankId, transactionId, transactionBase64, amount, from, requested } = req.body;
+        const { bankId, transactionId, transactionBase64, amount, from } = req.body;
+
+        if (from !== "HKD" && from !== "TWD" && from !== "USD") {
+            res.status(403).json({ "message": "deposit pairs are not supported", "data": {} });
+            return;
+        }
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
@@ -18,6 +23,16 @@ exports.in = async (req, res) => {
 
         if (user === null) {
             res.status(403).json({ "message": "unfound user", "data": {} });
+            return;
+        }
+
+        const Deposit = conn.model('Deposit', depositSchema);
+
+        const deposit = await Deposit.findOne({ currency: from, status: "on" })
+            .select({ _id: 0, bank: 1, branch: 1, name: 1, account: 1 });
+
+        if (deposit === null) {
+            res.status(403).json({ "message": "deposit pairs are not supported", "data": {} });
             return;
         }
 
@@ -41,11 +56,11 @@ exports.in = async (req, res) => {
         const transferInfo = {
             bankId,
             transactionId,
-            fileName : transactionFileName
+            fileName: transactionFileName
         }
 
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from, to: "USDT", amount, requested : "in", transferInfo });
+        await Order.create({ user: user._id, from, to: "USDT", amount, requested: "in", transferInfo, depositOrWithdraw: deposit });
 
         await conn.destroy();
 
@@ -63,6 +78,11 @@ exports.outBk = async (req, res) => {
         const { accessToken } = req.params;
         const { bankId, transactionId, amount, to } = req.body;
 
+        if (from !== "HKD" && from !== "TWD" && from !== "USD") {
+            res.status(403).json({ "message": "deposit pairs are not supported", "data": {} });
+            return;
+        }
+
         const currentTimestamp = Math.round(Date.now() / 1000);
 
         const conn = mongoose.createConnection(connectionConfig);
@@ -76,15 +96,24 @@ exports.outBk = async (req, res) => {
             return;
         }
 
+        const Deposit = conn.model('Deposit', depositSchema);
+
+        const deposit = await Deposit.findOne({ currency: to, status: "on" })
+            .select({ _id: 0, bank: 1, branch: 1, name: 1, account: 1 });
+
+        if (deposit === null) {
+            res.status(403).json({ "message": "deposit pairs are not supported", "data": {} });
+            return;
+        }
 
         const transferInfo = {
             bankId,
             transactionId,
-            fee : process.env.FEE
+            fee: process.env.FEE
         }
 
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from : "USDT", to, amount, requested : "out", transferInfo });
+        await Order.create({ user: user._id, from: "USDT", to, amount, requested: "out", transferInfo, depositOrWithdraw: deposit });
 
         await conn.destroy();
 
@@ -100,7 +129,7 @@ exports.outBk = async (req, res) => {
 exports.outBc = async (req, res) => {
     try {
         const { accessToken } = req.params;
-        const { address, chain, amount, to } = req.body;
+        const { address, chain, amount } = req.body;
 
         const currentTimestamp = Math.round(Date.now() / 1000);
 
@@ -118,11 +147,11 @@ exports.outBc = async (req, res) => {
         const transferInfo = {
             address,
             chain,
-            fee : process.env.FEE
+            fee: process.env.FEE
         }
 
         const Order = conn.model('Order', orderSchema);
-        await Order.create({ user: user._id, from : "USDT", to, amount, requested : "out", transferInfo });
+        await Order.create({ user: user._id, from: "USDT", to : "USDT", amount, requested: "out", transferInfo });
 
         await conn.destroy();
 
@@ -158,7 +187,7 @@ exports.get = async (req, res) => {
         const orders = await Order.find({ user: user._id, requested })
             .skip(skip)
             .limit(limit)
-            .select({ _id: 0, from: 1, to : 1, requested : 1, amount: 1, status: 1, createAt: 1, transferInfo : 1 })
+            .select({ _id: 0, from: 1, to: 1, requested: 1, amount: 1, status: 1, createAt: 1, transferInfo: 1, depositOrWithdraw: 1 })
             .sort({ createAt: -1 });
 
 

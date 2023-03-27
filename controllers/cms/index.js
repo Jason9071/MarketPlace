@@ -13,17 +13,6 @@ router.use((req, res, next) => {
     next();
 })
 
-router.post('/admin/login', admin.login);
-
-router.route('/admin/:accessToken')
-    .get(admin.get)
-    .put(admin.update);
-
-router.route('/admin/:accessToken/boss')
-    .get(boss.get)
-    .post(boss.create)
-    .delete(boss.delete);
-
 router.route('/admin/:accessToken/boss/user')
     .get(user.getAll)
     .put(user.update);
@@ -35,11 +24,22 @@ router.route('/admin/:accessToken/boss/order')
     .get(order.get)
     .put(order.update);
 
-router.route('/admin/:accessToken/user/:userId/image/:fileName')
-    .get(image.get);
-
 router.route('/admin/:accessToken/boss/deposit')
     .get(deposit.get)
     .put(deposit.update);
+
+router.post('/admin/login', admin.login);
+
+router.route('/admin/:accessToken')
+    .get(admin.get)
+    .put(admin.update);
+
+router.route('/admin/:accessToken/boss')
+    .get(boss.get)
+    .post(boss.create)
+    .delete(boss.delete);
+
+router.route('/admin/:accessToken/user/:userId/image/:fileName')
+    .get(image.get);
 
 module.exports = router;
