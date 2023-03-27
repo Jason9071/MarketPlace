@@ -1,0 +1,33 @@
+{
+  "name": "marketplace",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stage": "set NODE_ENV=development&& nodemon run index.js",
+    "dev": "pm2 start ecosystem.config.js --env develoment",
+    "prod": "pm2 start ecosystem.config.js --env production",
+    "stop": "pm2 stop exchange"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jason9071/MarketPlace.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jason9071/MarketPlace/issues"
+  },
+  "homepage": "https://github.com/Jason9071/MarketPlace#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mimetypes": "^0.1.1",
+    "mongoose": "^7.0.2",
+    "nodemon": "^2.0.22",
+    "pm2": "^5.3.0",
+    "uuid": "^9.0.0"
+  }
+}
