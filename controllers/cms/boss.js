@@ -4,7 +4,6 @@ const { mongoose, connectionConfig, adminSchema } = require('../../models');
 exports.get = async (req, res) => {
     const conn = mongoose.createConnection(connectionConfig);
     try {
-        const { skip, limit } = req.query;
         const { accessToken, amdminId } = req.params;
 
         const Admin = conn.model('Admin', adminSchema);
