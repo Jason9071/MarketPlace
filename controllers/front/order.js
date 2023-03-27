@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const fsp = require("fs/promises");
 const fs = require("fs");
 const mimeTypes = require('mimetypes');

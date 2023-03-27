@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const { mongoose, connectionConfig, adminSchema, userSchema } = require('../../models');
 
 exports.getAll = async (req, res) => {

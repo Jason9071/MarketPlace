@@ -1,6 +1,4 @@
-const fsp = require("fs/promises");
 const fs = require("fs");
-const mimeTypes = require('mimetypes');
 const { mongoose, connectionConfig, userSchema } = require('../../models');
 
 exports.get = async (req, res) => {
