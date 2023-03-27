@@ -194,7 +194,7 @@ exports.getAll = async (req, res) => {
         const orders = await Order.find({ user: user._id, requested, status })
             .skip(skip)
             .limit(limit)
-            .select({ _id: 0, from: 1, to: 1, requested: 1, amount: 1, status: 1, createAt: 1, transferInfo: 1, depositOrWithdraw: 1 })
+            .select({ _id: 0, from: 1, to: 1, requested: 1, amount: 1, status: 1, createAt: 1, transferInfo: 1, depositOrWithdraw: 1, rate : 1 })
             .sort({ createAt: -1 });
 
 
