@@ -19,8 +19,7 @@ exports.get = async (req, res) => {
         const orders = await Order.find({ status })
             .skip(skip)
             .limit(limit)
-            .populate('user', { _id: 0, id: 1 })
-            .select({ _id: 0 });
+            .populate('user', { _id: 0, id: 1 });
 
         res.status(200).json({ "message": "ok", "data": { orders } });
     } catch (err) {
