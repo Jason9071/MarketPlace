@@ -18,7 +18,8 @@ exports.get = async (req, res) => {
         }
 
         const Deposit = conn.model('Deposit', depositSchema);
-        const deposits = await Deposit.find();
+        const deposits = await Deposit.find({ status : "on" })
+            .select({ _id: 0, createAt: 0, updateAt: 0 });
 
         res.status(200).json({ "message": "ok", "data": { deposits } });
         return;
