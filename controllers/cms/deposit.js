@@ -28,7 +28,7 @@ exports.get = async (req, res) => {
 exports.update = async (req, res) => {
     try {
         const { accessToken } = req.params;
-        const { depositObjectId, changes } = req.body;
+        const { depositObjectId, bank, branch, name, account, currency, status } = req.body;
 
         const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
@@ -41,7 +41,7 @@ exports.update = async (req, res) => {
         }
 
         const Deposit = conn.model('Deposit', depositSchema);
-        await Deposit.findByIdAndUpdate({depositObjectId}, changes);
+        await Deposit.findByIdAndUpdate({ _id: depositObjectId }, { bank, branch, name, account, currency, status, updateAt : new Date });
 
         await conn.destroy();
         res.status(200).json({ "message": "ok", "data": {} });
