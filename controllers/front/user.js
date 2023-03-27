@@ -21,7 +21,7 @@ exports.login = async (req, res) => {
             accessTokenExist = await User.findOne({ accessToken: newAccessToken });
         }
 
-        const user = await User.findOneAndUpdate({ id, pw, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { accessToken: newAccessToken, accessTokenExpiryTimestamp: currentTimestamp + 2592000 })
+        const user = await User.findOneAndUpdate({ id, pw, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { accessToken: newAccessToken, accessTokenExpiryTimestamp: currentTimestamp + 2592000, updateAt : new Date })
             .select({ _id: 0, id: 1, image: 1, status: 1, review: 1, usdt: 1, accessToken: 1 });
 
         if (user === null) {
@@ -91,7 +91,7 @@ exports.create = async (req, res) => {
 
         await fsp.writeFile(idCardPathWithFileName, idCardBuffer);
 
-        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: idCardFileName, type: "idcard" } } });
+        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: idCardFileName, type: "idcard" } }, updateAt : new Date });
 
         const passport = passportBase64,
             passportMimeType = passport.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/)[1],
@@ -110,7 +110,7 @@ exports.create = async (req, res) => {
 
         await fsp.writeFile(passportPathWithFileName, passportBuffer);
 
-        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: passportFileName, type: "credential" } } });
+        await User.findOneAndUpdate({ accessToken: newUser.accessToken, status: { "$in": ["normal", "abnormal"] }, accessTokenExpiryTimestamp: { "$gte": currentTimestamp } }, { "$push": { image: { fileName: passportFileName, type: "credential" } }, updateAt : new Date });
 
         await conn.destroy();
 

@@ -22,8 +22,8 @@ router.route('/user/:accessToken')
 router.route('/user/:accessToken/order')
     .get(order.get);
 
-router.route('/user/:accessToken/order/in')
-    .post(order.in);
+router.route('/user/:accessToken/order/in/bk')
+    .post(order.inBk);
 
 router.route('/user/:accessToken/order/out/bk')
     .post(order.outBk);

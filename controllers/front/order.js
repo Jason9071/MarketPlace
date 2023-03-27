@@ -3,7 +3,7 @@ const fs = require("fs");
 const mimeTypes = require('mimetypes');
 const { mongoose, connectionConfig, userSchema, orderSchema, depositSchema } = require('../../models');
 
-exports.in = async (req, res) => {
+exports.inBk = async (req, res) => {
     try {
         const { accessToken } = req.params;
         const { bankId, transactionId, transactionBase64, amount, from } = req.body;
