@@ -2,11 +2,11 @@ const { v4: uuidv4 } = require('uuid');
 const { mongoose, connectionConfig, adminSchema } = require('../../models');
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { skip, limit } = req.query;
         const { accessToken } = req.params;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
         const boss = await Admin.findOne({ accessToken, ban: false, permissnion: "boss" });
 
@@ -21,20 +21,22 @@ exports.get = async (req, res) => {
             .select({ _id: 0, accessToken: 0 });
 
         res.status(200).json({ "message": "ok", "data": { admins } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.create = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
         const { id, pw, permissnion } = req.body;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
 
         const boss = await Admin.findOne({ accessToken, ban: false, permissnion: "boss" });
@@ -70,10 +72,12 @@ exports.create = async (req, res) => {
         await conn.destroy();
 
         res.status(200).json({ "message": "ok", "data": { admin } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }

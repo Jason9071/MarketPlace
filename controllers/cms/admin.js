@@ -1,10 +1,10 @@
 const { mongoose, connectionConfig, adminSchema } = require('../../models');
 
 exports.login = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { id, pw } = req.body;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
         const admin = await Admin.findOne({ id, pw, ban: false });
 
@@ -14,19 +14,21 @@ exports.login = async (req, res) => {
         }
 
         res.status(200).json({ "message": "ok", "data": { admin } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
         const admin = await Admin.findOne({ accessToken, ban: false })
             .select({ _id: 0 });
@@ -37,10 +39,12 @@ exports.get = async (req, res) => {
         }
 
         res.status(200).json({ "message": "ok", "data": { admin } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }

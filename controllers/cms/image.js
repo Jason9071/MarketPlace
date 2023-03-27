@@ -2,10 +2,10 @@ const fs = require("fs");
 const { mongoose, connectionConfig, adminSchema } = require('../../models');
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken, userId, fileName } = req.params;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
         const admin = await Admin.findOne({ accessToken, ban : false });
 
@@ -22,11 +22,12 @@ exports.get = async (req, res) => {
         }
 
         res.sendFile(imagePathWithFileName);
-
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }

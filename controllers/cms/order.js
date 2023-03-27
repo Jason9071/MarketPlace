@@ -1,11 +1,11 @@
 const { mongoose, connectionConfig, adminSchema, userSchema, orderSchema } = require('../../models');
 
 exports.get = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { skip, limit, status } = req.query;
         const { accessToken } = req.params;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
         const boss = await Admin.findOne({ accessToken, ban: false, permissnion: "boss" });
 
@@ -23,20 +23,22 @@ exports.get = async (req, res) => {
             .select({ _id: 0 });
 
         res.status(200).json({ "message": "ok", "data": { orders } });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }
 
 exports.update = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
     try {
         const { accessToken } = req.params;
         const { orderObjectId, status } = req.body;
 
-        const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
 
         const boss = await Admin.findOne({ accessToken, ban: false, permissnion: "boss" });
@@ -69,12 +71,13 @@ exports.update = async (req, res) => {
             await User.findByIdAndUpdate({ _id: order.user }, { "$inc": { usdt: order.amount * -1 } });
         }
 
-        await conn.destroy();
         res.status(200).json({ "message": "ok", "data": {} });
-        return;
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
         return;
     }
 }
