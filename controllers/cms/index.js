@@ -21,7 +21,7 @@ router.route('/admin/:accessToken/boss/user/:id')
     .get(user.get);
 
 router.route('/admin/:accessToken/boss/order')
-    .get(order.get)
+    .get(order.getAll)
     .put(order.update);
 
 router.route('/admin/:accessToken/boss/deposit')
@@ -34,10 +34,13 @@ router.route('/admin/:accessToken')
     .get(admin.get)
     .put(admin.update);
 
-router.route('/admin/:accessToken/boss')
+router.route('/admin/:accessToken/boss/:amdminId')
     .get(boss.get)
+
+router.route('/admin/:accessToken/boss')
+    .get(boss.getAll)
     .post(boss.create)
-    .delete(boss.delete);
+    .put(boss.update);
 
 router.route('/admin/:accessToken/user/:userId/image/:fileName')
     .get(image.get);

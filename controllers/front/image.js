@@ -29,7 +29,6 @@ exports.get = async (req, res) => {
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });
-
     } finally {
         await conn.destroy();
         return;

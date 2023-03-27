@@ -5,6 +5,34 @@ exports.get = async (req, res) => {
     const conn = mongoose.createConnection(connectionConfig);
     try {
         const { skip, limit } = req.query;
+        const { accessToken, amdminId } = req.params;
+
+        const Admin = conn.model('Admin', adminSchema);
+        const boss = await Admin.findOne({ accessToken, ban: false, permissnion: "boss" });
+
+        if (boss === null) {
+            res.status(403).json({ "message": "unfound admin or permission denied", "data": {} });
+            return;
+        }
+
+        const admin = await Admin.findOne( { id : amdminId } )
+            .select({ _id: 0, accessToken: 0 });
+
+        res.status(200).json({ "message": "ok", "data": { admin } });
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({ message: "internal server error" });
+        return;
+    } finally {
+        await conn.destroy();
+        return;
+    }
+}
+
+exports.getAll = async (req, res) => {
+    const conn = mongoose.createConnection(connectionConfig);
+    try {
+        const { skip, limit } = req.query;
         const { accessToken } = req.params;
 
         const Admin = conn.model('Admin', adminSchema);
@@ -82,10 +110,10 @@ exports.create = async (req, res) => {
     }
 }
 
-exports.delete = async (req, res) => {
+exports.update = async (req, res) => {
     try {
         const { accessToken } = req.params;
-        const { id } = req.body;
+        const { id, pw, ban } = req.body;
 
         const conn = mongoose.createConnection(connectionConfig);
         const Admin = conn.model('Admin', adminSchema);
@@ -97,7 +125,7 @@ exports.delete = async (req, res) => {
             return;
         }
 
-        await Admin.findOneAndUpdate({ id }, { ban: true, updateAt: new Date });
+        await Admin.findOneAndUpdate({ id }, { pw, ban, updateAt: new Date });
 
         await conn.destroy();
 

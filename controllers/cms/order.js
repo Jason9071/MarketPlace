@@ -1,6 +1,6 @@
 const { mongoose, connectionConfig, adminSchema, userSchema, orderSchema } = require('../../models');
 
-exports.get = async (req, res) => {
+exports.getAll = async (req, res) => {
     const conn = mongoose.createConnection(connectionConfig);
     try {
         const { skip, limit, status } = req.query;
@@ -16,12 +16,26 @@ exports.get = async (req, res) => {
 
         const User = conn.model('User', userSchema);
         const Order = conn.model('Order', orderSchema);
-        const orders = await Order.find({ status })
-            .skip(skip)
-            .limit(limit)
-            .populate('user', { _id: 0, id: 1 });
 
-        res.status(200).json({ "message": "ok", "data": { orders } });
+        if (status === undefined) {
+            const orders = await Order.find()
+                .skip(skip)
+                .limit(limit)
+                .sort({ createAt: -1 })
+                .populate('user', { _id: 0, id: 1 });
+
+            res.status(200).json({ "message": "ok", "data": { orders } });
+        } else {
+            const orders = await Order.find({ status })
+                .skip(skip)
+                .limit(limit)
+                .sort({ createAt: -1 })
+                .populate('user', { _id: 0, id: 1 });
+
+            res.status(200).json({ "message": "ok", "data": { orders } });
+        }
+
+
     } catch (err) {
         console.log(err)
         res.status(500).json({ message: "internal server error" });

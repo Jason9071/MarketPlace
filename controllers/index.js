@@ -7,6 +7,7 @@ router.use('/front', front);
 router.use('/cms', cms);
 
 router.all('*', (req, res) => {
+    console.log("path not found");
     res.status(200).json({ "message": "unfound api path", "data": {} });
     return;
 });
