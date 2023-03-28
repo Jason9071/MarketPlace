@@ -106,6 +106,7 @@ module.exports.userSchema = new Schema({
         type: Number,
         required: true,
         default: 0,
+        min:0
     },
     createAt: {
         type: Date,
@@ -231,6 +232,7 @@ module.exports.orderSchema = new Schema({
         type: Number,
         required: true,
         default: 0,
+        min:0
     },
     rate: {
         type: Number,
